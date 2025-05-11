@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 
 
 class Category(models.Model):
@@ -14,13 +15,13 @@ class Dish(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('NEW', 'Новый'),
-        ('PREP', 'Готовится'),
-        ('DONE', 'Завершен'),
+        ('ACCEPTED', 'Принят'),
+        ('DELIVERED', 'Подан'),
+        ('PAID', 'Оплачен')
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Кто создал заказ
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     dishes = models.ManyToManyField(Dish, through='OrderItem')
-    status = models.CharField(max_length=4, choices=STATUS_CHOICES, default='NEW')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='ACCEPTED')
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -28,3 +29,19 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+
+
+class User(AbstractUser):
+    is_waiter = models.BooleanField(default=False)
+    is_kitchen = models.BooleanField(default=False)
+
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='api_user_set',
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='api_user_permissions',
+        blank=True
+    )

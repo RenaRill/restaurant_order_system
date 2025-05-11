@@ -8,4 +8,14 @@ class IsAdmin(permissions.BasePermission):
 
 class IsWaiter(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user and not request.user.is_staff
+        return request.user and getattr(request.user, 'is_waiter', False)
+
+
+class IsKitchen(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user and getattr(request.user, 'is_kitchen', False)
+
+
+class ReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS

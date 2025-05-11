@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Dish, Order, OrderItem, User
+from .models import Category, Dish, Order, OrderItem
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
@@ -22,7 +22,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    dishes = OrderItemSerializer(many=True, write_only=True)  # Добавляем write_only
+    dishes = OrderItemSerializer(many=True, write_only=True)
 
     class Meta:
         model = Order
@@ -55,4 +55,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['is_admin'] = user.is_staff
+        token['is_waiter'] = user.is_waiter
+        token['is_kitchen'] = user.is_kitchen
         return token
